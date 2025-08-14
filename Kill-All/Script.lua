@@ -544,4 +544,111 @@ killName_closeBtn.MouseButton1Click:Connect(function()
 end)
 
 -- Autocomplete enquanto digita
-killName_playerNameBox:GetPropertyChangedSignal("Text"):Connect(function
+killName_playerNameBox:GetPropertyChangedSignal("Text"):Connect(function()
+    local currentText = killName_playerNameBox.Text
+    killName_lastPlayerName = currentText
+    killName_updateSuggestions(currentText)
+end)
+
+-- Executar kill
+killName_executeBtn.MouseButton1Click:Connect(function()
+    local targetName = killName_playerNameBox.Text
+    if targetName == "" then
+        print("❌ Digite o nome de um jogador")
+        return
+    end
+    
+    killName_lastPlayerName = targetName
+    print("🎯 Tentando matar: " .. targetName)
+    killName_killPlayerByName(targetName)
+end)
+
+-- Fechar com ESC e salvar o texto
+UserInputService.InputBegan:Connect(function(input, gameProcessed)
+    if not gameProcessed and input.KeyCode == Enum.KeyCode.Escape and killName_mainMenu.Visible then
+        killName_lastPlayerName = killName_playerNameBox.Text
+        killName_mainMenu.Visible = false
+        killName_playerNameBox.Text = ""
+        killName_suggestionsList.Visible = false
+    end
+end)
+
+-- Permitir que o usuário clique no TextBox para abrir o teclado manualmente
+killName_playerNameBox.MouseButton1Click:Connect(function()
+    killName_playerNameBox:CaptureFocus()
+end)
+
+-- ======================================================================
+-- EVENTOS DA INTERFACE - INSTAKILL ALL (CORRIGIDOS)
+-- ======================================================================
+
+-- Toggle principal (CORRIGIDO)
+instakill_toggleBtn.MouseButton1Click:Connect(function()
+    instakill_enabled = not instakill_enabled
+    instakill_toggleBtn.Text = instakill_enabled and "INSTAKILL ON" or "INSTAKILL OFF"
+    instakill_toggleBtn.BackgroundColor3 = instakill_enabled and Color3.new(0, 1, 0) or Color3.new(1, 0, 0)
+    print("Instakill:", instakill_enabled and "ATIVADO" or "DESATIVADO")
+end)
+
+-- Toggle FOV (CORRIGIDO)
+instakill_fovToggleBtn.MouseButton1Click:Connect(function()
+    instakill_fovEnabled = not instakill_fovEnabled
+    instakill_fovToggleBtn.Text = instakill_fovEnabled and "FOV ON" or "FOV OFF"
+    instakill_fovToggleBtn.BackgroundColor3 = instakill_fovEnabled and Color3.new(0, 1, 0) or Color3.new(0.5, 0, 0)
+    instakill_fovCircle.Visible = instakill_fovEnabled
+    print("FOV:", instakill_fovEnabled and "ATIVADO" or "DESATIVADO")
+end)
+
+-- Input de tamanho FOV (CORRIGIDO)
+instakill_fovSizeInput.FocusLost:Connect(function(enterPressed)
+    if enterPressed then
+        local value = tonumber(instakill_fovSizeInput.Text)
+        if value then
+            instakill_fovSize = math.clamp(value, 0, 100)
+            instakill_fovSizeInput.Text = tostring(instakill_fovSize)
+            instakill_updateFOVCircle()
+            print("FOV Size:", instakill_fovSize)
+        else
+            instakill_fovSizeInput.Text = tostring(instakill_fovSize)
+        end
+    end
+end)
+
+-- ======================================================================
+-- LOOPS E SPAWNS
+-- ======================================================================
+
+-- Loop Instakill (CORRIGIDO)
+spawn(function()
+    while true do
+        if instakill_enabled then
+            instakill_instakillLoop()
+        end
+        task.wait(0.01)
+    end
+end)
+
+-- Atualizar posição do círculo continuamente (CORRIGIDO)
+spawn(function()
+    while true do
+        if instakill_fovEnabled then
+            instakill_updateFOVCircle()
+        end
+        task.wait(0.05)
+    end
+end)
+
+-- Atualizar lista de jogadores periodicamente (para Kill Name)
+spawn(function()
+    while true do
+        task.wait(2)
+        if killName_mainMenu.Visible and killName_playerNameBox.Text ~= "" then
+            killName_updateSuggestions(killName_playerNameBox.Text)
+        end
+    end
+end)
+
+print("⚡ AS-VAL COMPLETE CARREGADO")
+print("✅ Kill Name: Botão no canto direito superior")
+print("✅ Instakill: Botões no canto direito (meio e inferior)")
+print("✅ Tudo integrado e funcional")
