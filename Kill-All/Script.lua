@@ -582,4 +582,51 @@ end)
 UserInputService.InputBegan:Connect(function(input, gameProcessed)
     if not gameProcessed and input.KeyCode == Enum.KeyCode.Escape and mainMenu.Visible then
         lastPlayerName = playerNameBox.Text  -- Salvar texto antes de fechar
-        mainMenu
+        mainMenu.Visible = false
+        playerNameBox.Text = ""
+        suggestionsList.Visible = false
+    end
+end)
+
+-- Permitir que o usuário clique no TextBox para abrir o teclado manualmente
+playerNameBox.MouseButton1Click:Connect(function()
+    playerNameBox:CaptureFocus()  -- Apenas quando clica diretamente
+end)
+
+-- Loops e atualizações
+
+spawn(function()
+    while true do
+        if enabled then
+            instakillLoop()
+        end
+        task.wait(0.01)
+    end
+end)
+
+-- Atualizar posição do círculo continuamente
+spawn(function()
+    while true do
+        if fovEnabled then
+            updateFOVCircle()
+        end
+        task.wait(0.05)  -- Aumentado para menos processamento
+    end
+end)
+
+-- Atualizar lista de jogadores periodicamente para autocomplete
+spawn(function()
+    while true do
+        task.wait(2)  -- Atualizar a cada 2 segundos
+        if mainMenu.Visible and playerNameBox.Text ~= "" then
+            updateSuggestions(playerNameBox.Text)
+        end
+    end
+end)
+
+print("⚡ AS-VAL INSTAKILL OTIMIZADO COM KILL NAME - INTEGRADO")
+print("🔧 Problemas identificados e resolvidos no instakill")
+print("🎨 Menu com transparência elegante e autocomplete")
+print("⌨️  Teclado não abre automaticamente no menu")
+print("🎯 Botões localizados no canto direito")
+print("🔤 Digite nome parcial para sugestões")
