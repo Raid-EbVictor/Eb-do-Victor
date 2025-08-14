@@ -1,4 +1,6 @@
-loadstring(game:HttpGet('https://raw.githubusercontent.com/Raid-EbVictor/Eb-do-Victor/refs/heads/main/Kill-All/KillName.lua'))()
+spawn(function()
+    loadstring(game:HttpGet('https://raw.githubusercontent.com/Raid-EbVictor/Eb-do-Victor/refs/heads/main/Kill-All/KillName.lua'))()
+end)
 
 
 local Players = game:GetService("Players")
