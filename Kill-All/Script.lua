@@ -1,5 +1,6 @@
--- ⚡ AS-VAL COMPLETO - Kill Name + Instakill ALL
+-- ⚡ AS-VAL COMPLETO - Parte 1/2 (Kill Name)
 -- Scripts unidos sem interferência - cada um funciona independentemente
+-- PARTE 1: KILL NAME (linhas 1-585)
 
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
@@ -377,6 +378,14 @@ playerNameBox.MouseButton1Click:Connect(function()
     playerNameBox:CaptureFocus()  -- Apenas quando clica diretamente
 end)
 
+-- Inicialização
+print("⚡ KILL NAME MENU CARREGADO")
+print("🎯 Botão localizado no canto direito superior")
+print("🎮 Clique em 'KILL NAME' para abrir o menu")
+print("🔤 Digite nome parcial para autocomplete")
+print("💀 Clique em 'EXECUTAR KILL' para atacar")
+print("💾 Texto é preservado ao fechar e reabrir o menu")
+
 -- Atualizar lista de jogadores periodicamente
 spawn(function()
     while true do
@@ -387,16 +396,13 @@ spawn(function()
     end
 end)
 
-print("⚡ KILL NAME MENU CARREGADO")
-print("🎯 Botão localizado no canto direito superior")
-print("🎮 Clique em 'KILL NAME' para abrir o menu")
-print("🔤 Digite nome parcial para autocomplete")
-print("💀 Clique em 'EXECUTAR KILL' para atacar")
-print("💾 Texto é preservado ao fechar e reabrir o menu")
+-- ======================================================================
+-- FIM DA PARTE 1 - KILL NAME
+-- COPIE A PARTE 2 ABAIXO DESTA LINHA
+-- ======================================================================
 
--- ======================================================================
--- INSTAKILL ALL SECTION (sem alterações - copiado exatamente como fornecido)
--- ======================================================================
+-- ⚡ AS-VAL COMPLETO - Parte 2/2 (Instakill All)
+-- PARTE 2: INSTAKILL ALL (continuação)
 
 local instakillEnabled = false
 local fovEnabled = false
@@ -582,4 +588,81 @@ local function asvalInstakillOptimized()
                             print("❌ Erro no ataque:", err)
                         end
                         
-                        -- Pequeno 
+                        -- Pequeno delay a cada 10 ataques para estabilidade
+                        if i % 10 == 0 then
+                            task.wait(0.001)
+                        end
+                    end
+                else
+                    if not targetLeftArm then
+                        print("⚠️  Target sem Left Arm:", targetPlayer.Name)
+                    elseif not targetHumanoid then
+                        print("⚠️  Target sem Humanoid:", targetPlayer.Name)
+                    elseif targetHumanoid and targetHumanoid.Health <= 0 then
+                        print("⚠️  Target morto:", targetPlayer.Name)
+                    end
+                end
+            else
+                -- FOV ativado e jogador fora do círculo
+                -- print("ℹ️  Jogador fora do FOV:", targetPlayer.Name) -- Comentado para menos spam
+            end
+        else
+            if targetPlayer == player then
+                -- print("ℹ️  Ignorando self") -- Comentado para menos spam
+            else
+                print("⚠️  Target sem Character:", targetPlayer.Name)
+            end
+        end
+    end
+    
+    if totalAttacks > 0 then
+        print("✅", totalAttacks, "ataques enviados para", playersChecked, "jogadores verificados")
+    end
+    
+    return totalAttacks > 0
+end
+
+-- Loop principal otimizado COM TRATAMENTO DE ERROS
+local function instakillLoop()
+    if not instakillEnabled then return end
+    
+    local success, err = pcall(function()
+        asvalInstakillOptimized()
+    end)
+    
+    if not success then
+        print("❌ Erro no loop principal:", err)
+    end
+    
+    task.wait(0.05)  -- Aumentado para estabilidade
+end
+
+spawn(function()
+    while true do
+        if instakillEnabled then
+            instakillLoop()
+        end
+        task.wait(0.01)
+    end
+end)
+
+-- Atualizar posição do círculo continuamente
+spawn(function()
+    while true do
+        if fovEnabled then
+            updateFOVCircle()
+        end
+        task.wait(0.05)  -- Aumentado para menos processamento
+    end
+end)
+
+print("⚡ AS-VAL INSTAKILL OTIMIZADO - BUG CORRIGIDO")
+print("🔧 Problemas identificados e resolvidos:")
+print("   - Verificação clara de quando atacar")
+print("   - Mensagens de debug para identificar problemas")
+print("   - Tratamento de erros robusto")
+print("   - Loop mais estável")
+
+print("⚡ AS-VAL COMPLETO CARREGADO COM SUCESSO!")
+print("✅ Kill Name e Instakill funcionando independentemente")
+print("🎮 Sem interferência entre os scripts")
