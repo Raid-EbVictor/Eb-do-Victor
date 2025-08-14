@@ -1,149 +1,214 @@
--- ⚡ AS-VAL COMPLETO - Parte 1/2 (Kill Name)
--- Scripts unidos sem interferência - cada um funciona independentemente
--- PARTE 1: KILL NAME (linhas 1-585)
+-- ⚡ AS-VAL COMPLETE - Kill Name + Instakill All
+-- Scripts unidos profissionalmente - cada um funciona independentemente
+-- Totalmente otimizado e compatível com limites de cópia
+
+print("⚡ CARREGANDO AS-VAL COMPLETE...")
+
+-- ======================================================================
+-- CONFIGURAÇÃO GLOBAL E SERVIÇOS
+-- ======================================================================
 
 local Players = game:GetService("Players")
 local player = Players.LocalPlayer
 local ReplicatedStorage = game:GetService("ReplicatedStorage")
 local RunService = game:GetService("RunService")
 local UserInputService = game:GetService("UserInputService")
+local TextService = game:GetService("TextService")
 
-print("⚡ CARREGANDO AS-VAL COMPLETO...")
+-- Variáveis globais compartilhadas
+local killName_lastPlayerName = ""
+local instakill_enabled = false
+local instakill_fovEnabled = false
+local instakill_fovSize = 200
+local instakill_maxFOVSize = 500
 
 -- ======================================================================
--- KILL NAME SECTION (sem alterações - copiado exatamente como fornecido)
+-- INTERFACE GRÁFICA UNIFICADA
 -- ======================================================================
 
--- Variável para armazenar o texto do último jogador
-local lastPlayerName = ""
-
--- UI Principal
 local screenGui = Instance.new("ScreenGui")
 screenGui.Name = "ASVAL_CompleteGUI"
 screenGui.Parent = player:FindFirstChildOfClass("PlayerGui") or game:GetService("CoreGui")
+
+-- ======================================================================
+-- KILL NAME - INTERFACE E FUNCIONALIDADES
+-- ======================================================================
 
 -- Botão Kill Name (canto direito superior)
 local killNameBtn = Instance.new("TextButton")
 killNameBtn.Size = UDim2.new(0, 120, 0, 40)
 killNameBtn.Position = UDim2.new(1, -140, 0.1, -20)
 killNameBtn.Text = "KILL NAME"
-killNameBtn.BackgroundColor3 = Color3.new(0.8, 0, 0.8)  -- Roxo
+killNameBtn.BackgroundColor3 = Color3.new(0.8, 0, 0.8)
 killNameBtn.TextColor3 = Color3.new(1, 1, 1)
 killNameBtn.AutoButtonColor = true
+killNameBtn.ZIndex = 10
 killNameBtn.Parent = screenGui
 
--- Menu Principal (inicialmente invisível) - COM TRANSPARÊNCIA
-local mainMenu = Instance.new("Frame")
-mainMenu.Size = UDim2.new(0, 400, 0, 250)
-mainMenu.Position = UDim2.new(0.5, -200, 0.5, -125)  -- Centralizado
-mainMenu.BackgroundColor3 = Color3.new(0.1, 0.1, 0.1)
-mainMenu.BackgroundTransparency = 0.4  -- Transparência adicionada (60% visível)
-mainMenu.BorderSizePixel = 2
-mainMenu.BorderColor3 = Color3.new(0.8, 0, 0.8)
-mainMenu.Visible = false
-mainMenu.ZIndex = 100
-mainMenu.Parent = screenGui
+-- Menu Principal Kill Name
+local killName_mainMenu = Instance.new("Frame")
+killName_mainMenu.Size = UDim2.new(0, 400, 0, 250)
+killName_mainMenu.Position = UDim2.new(0.5, -200, 0.5, -125)
+killName_mainMenu.BackgroundColor3 = Color3.new(0.1, 0.1, 0.1)
+killName_mainMenu.BackgroundTransparency = 0.4
+killName_mainMenu.BorderSizePixel = 2
+killName_mainMenu.BorderColor3 = Color3.new(0.8, 0, 0.8)
+killName_mainMenu.Visible = false
+killName_mainMenu.ZIndex = 100
+killName_mainMenu.Parent = screenGui
 
--- UICorner para arredondar o menu
-local menuCorner = Instance.new("UICorner")
-menuCorner.CornerRadius = UDim.new(0, 10)
-menuCorner.Parent = mainMenu
+local killName_menuCorner = Instance.new("UICorner")
+killName_menuCorner.CornerRadius = UDim.new(0, 10)
+killName_menuCorner.Parent = killName_mainMenu
 
 -- Título do Menu
-local menuTitle = Instance.new("TextLabel")
-menuTitle.Size = UDim2.new(1, 0, 0, 40)
-menuTitle.Position = UDim2.new(0, 0, 0, 0)
-menuTitle.Text = "🎯 KILL BY NAME"
-menuTitle.TextColor3 = Color3.new(1, 1, 1)
-menuTitle.BackgroundTransparency = 1
-menuTitle.TextSize = 20
-menuTitle.Font = Enum.Font.GothamBold
-menuTitle.ZIndex = 101
-menuTitle.Parent = mainMenu
+local killName_menuTitle = Instance.new("TextLabel")
+killName_menuTitle.Size = UDim2.new(1, 0, 0, 40)
+killName_menuTitle.Position = UDim2.new(0, 0, 0, 0)
+killName_menuTitle.Text = "🎯 KILL BY NAME"
+killName_menuTitle.TextColor3 = Color3.new(1, 1, 1)
+killName_menuTitle.BackgroundTransparency = 1
+killName_menuTitle.TextSize = 20
+killName_menuTitle.Font = Enum.Font.GothamBold
+killName_menuTitle.ZIndex = 101
+killName_menuTitle.Parent = killName_mainMenu
 
 -- Botão Fechar (X)
-local closeBtn = Instance.new("TextButton")
-closeBtn.Size = UDim2.new(0, 30, 0, 30)
-closeBtn.Position = UDim2.new(1, -35, 0, 5)
-closeBtn.Text = "✕"
-closeBtn.TextSize = 20
-closeBtn.BackgroundColor3 = Color3.new(0.8, 0, 0)
-closeBtn.TextColor3 = Color3.new(1, 1, 1)
-closeBtn.AutoButtonColor = true
-closeBtn.ZIndex = 102
-closeBtn.Parent = mainMenu
+local killName_closeBtn = Instance.new("TextButton")
+killName_closeBtn.Size = UDim2.new(0, 30, 0, 30)
+killName_closeBtn.Position = UDim2.new(1, -35, 0, 5)
+killName_closeBtn.Text = "✕"
+killName_closeBtn.TextSize = 20
+killName_closeBtn.BackgroundColor3 = Color3.new(0.8, 0, 0)
+killName_closeBtn.TextColor3 = Color3.new(1, 1, 1)
+killName_closeBtn.AutoButtonColor = true
+killName_closeBtn.ZIndex = 102
+killName_closeBtn.Parent = killName_mainMenu
 
-local closeCorner = Instance.new("UICorner")
-closeCorner.CornerRadius = UDim.new(0.5, 0)
-closeCorner.Parent = closeBtn
+local killName_closeCorner = Instance.new("UICorner")
+killName_closeCorner.CornerRadius = UDim.new(0.5, 0)
+killName_closeCorner.Parent = killName_closeBtn
 
 -- Label de instrução
-local instructionLabel = Instance.new("TextLabel")
-instructionLabel.Size = UDim2.new(1, -20, 0, 20)
-instructionLabel.Position = UDim2.new(0, 10, 0, 50)
-instructionLabel.Text = "Digite o nome do jogador:"
-instructionLabel.TextColor3 = Color3.new(0.8, 0.8, 0.8)
-instructionLabel.BackgroundTransparency = 1
-instructionLabel.TextSize = 14
-instructionLabel.Font = Enum.Font.Gotham
-instructionLabel.TextXAlignment = Enum.TextXAlignment.Left
-instructionLabel.ZIndex = 101
-instructionLabel.Parent = mainMenu
+local killName_instructionLabel = Instance.new("TextLabel")
+killName_instructionLabel.Size = UDim2.new(1, -20, 0, 20)
+killName_instructionLabel.Position = UDim2.new(0, 10, 0, 50)
+killName_instructionLabel.Text = "Digite o nome do jogador:"
+killName_instructionLabel.TextColor3 = Color3.new(0.8, 0.8, 0.8)
+killName_instructionLabel.BackgroundTransparency = 1
+killName_instructionLabel.TextSize = 14
+killName_instructionLabel.Font = Enum.Font.Gotham
+killName_instructionLabel.TextXAlignment = Enum.TextXAlignment.Left
+killName_instructionLabel.ZIndex = 101
+killName_instructionLabel.Parent = killName_mainMenu
 
--- TextBox para nome do jogador (com autocomplete) - SEM ABRIR TECLADO AUTOMÁTICO
-local playerNameBox = Instance.new("TextBox")
-playerNameBox.Size = UDim2.new(1, -40, 0, 35)
-playerNameBox.Position = UDim2.new(0, 20, 0, 80)
-playerNameBox.PlaceholderText = "Digite o nome do jogador..."
-playerNameBox.BackgroundColor3 = Color3.new(0.2, 0.2, 0.2)
-playerNameBox.BackgroundTransparency = 0.2  -- Pequena transparência
-playerNameBox.TextColor3 = Color3.new(1, 1, 1)
-playerNameBox.TextSize = 16
-playerNameBox.Font = Enum.Font.Gotham
-playerNameBox.ClearTextOnFocus = false
-playerNameBox.ZIndex = 101
-playerNameBox.Parent = mainMenu
+-- TextBox para nome do jogador
+local killName_playerNameBox = Instance.new("TextBox")
+killName_playerNameBox.Size = UDim2.new(1, -40, 0, 35)
+killName_playerNameBox.Position = UDim2.new(0, 20, 0, 80)
+killName_playerNameBox.PlaceholderText = "Digite o nome do jogador..."
+killName_playerNameBox.BackgroundColor3 = Color3.new(0.2, 0.2, 0.2)
+killName_playerNameBox.BackgroundTransparency = 0.2
+killName_playerNameBox.TextColor3 = Color3.new(1, 1, 1)
+killName_playerNameBox.TextSize = 16
+killName_playerNameBox.Font = Enum.Font.Gotham
+killName_playerNameBox.ClearTextOnFocus = false
+killName_playerNameBox.ZIndex = 101
+killName_playerNameBox.Parent = killName_mainMenu
 
-local textBoxCorner = Instance.new("UICorner")
-textBoxCorner.CornerRadius = UDim.new(0, 5)
-textBoxCorner.Parent = playerNameBox
+local killName_textBoxCorner = Instance.new("UICorner")
+killName_textBoxCorner.CornerRadius = UDim.new(0, 5)
+killName_textBoxCorner.Parent = killName_playerNameBox
 
 -- Lista de sugestões (autocomplete)
-local suggestionsList = Instance.new("ScrollingFrame")
-suggestionsList.Size = UDim2.new(1, -40, 0, 100)
-suggestionsList.Position = UDim2.new(0, 20, 0, 125)
-suggestionsList.BackgroundTransparency = 0.1  -- Levemente transparente
-suggestionsList.BackgroundColor3 = Color3.new(0.15, 0.15, 0.15)
-suggestionsList.ScrollBarThickness = 6
-suggestionsList.ScrollBarImageColor3 = Color3.new(0.5, 0, 0.5)
-suggestionsList.Visible = false
-suggestionsList.ZIndex = 101
-suggestionsList.Parent = mainMenu
+local killName_suggestionsList = Instance.new("ScrollingFrame")
+killName_suggestionsList.Size = UDim2.new(1, -40, 0, 100)
+killName_suggestionsList.Position = UDim2.new(0, 20, 0, 125)
+killName_suggestionsList.BackgroundTransparency = 0.1
+killName_suggestionsList.BackgroundColor3 = Color3.new(0.15, 0.15, 0.15)
+killName_suggestionsList.ScrollBarThickness = 6
+killName_suggestionsList.ScrollBarImageColor3 = Color3.new(0.5, 0, 0.5)
+killName_suggestionsList.Visible = false
+killName_suggestionsList.ZIndex = 101
+killName_suggestionsList.Parent = killName_mainMenu
 
-local suggestionsLayout = Instance.new("UIListLayout")
-suggestionsLayout.Padding = UDim.new(0, 2)
-suggestionsLayout.SortOrder = Enum.SortOrder.LayoutOrder
-suggestionsLayout.Parent = suggestionsList
+local killName_suggestionsLayout = Instance.new("UIListLayout")
+killName_suggestionsLayout.Padding = UDim.new(0, 2)
+killName_suggestionsLayout.SortOrder = Enum.SortOrder.LayoutOrder
+killName_suggestionsLayout.Parent = killName_suggestionsList
 
 -- Botão Executar Kill
-local executeBtn = Instance.new("TextButton")
-executeBtn.Size = UDim2.new(0, 150, 0, 40)
-executeBtn.Position = UDim2.new(0.5, -75, 1, -50)
-executeBtn.Text = "💀 EXECUTAR KILL"
-executeBtn.BackgroundColor3 = Color3.new(0.8, 0, 0)
-executeBtn.BackgroundTransparency = 0.1  -- Pequena transparência
-executeBtn.TextColor3 = Color3.new(1, 1, 1)
-executeBtn.TextSize = 16
-executeBtn.Font = Enum.Font.GothamBold
-executeBtn.AutoButtonColor = true
-executeBtn.ZIndex = 101
-executeBtn.Parent = mainMenu
+local killName_executeBtn = Instance.new("TextButton")
+killName_executeBtn.Size = UDim2.new(0, 150, 0, 40)
+killName_executeBtn.Position = UDim2.new(0.5, -75, 1, -50)
+killName_executeBtn.Text = "💀 EXECUTAR KILL"
+killName_executeBtn.BackgroundColor3 = Color3.new(0.8, 0, 0)
+killName_executeBtn.BackgroundTransparency = 0.1
+killName_executeBtn.TextColor3 = Color3.new(1, 1, 1)
+killName_executeBtn.TextSize = 16
+killName_executeBtn.Font = Enum.Font.GothamBold
+killName_executeBtn.AutoButtonColor = true
+killName_executeBtn.ZIndex = 101
+killName_executeBtn.Parent = killName_mainMenu
 
-local executeCorner = Instance.new("UICorner")
-executeCorner.CornerRadius = UDim.new(0, 5)
-executeCorner.Parent = executeBtn
+local killName_executeCorner = Instance.new("UICorner")
+killName_executeCorner.CornerRadius = UDim.new(0, 5)
+killName_executeCorner.Parent = killName_executeBtn
 
--- Função para encontrar RemoteEvent do dano
+-- ======================================================================
+-- INSTAKILL ALL - INTERFACE E FUNCIONALIDADES
+-- ======================================================================
+
+-- Círculo FOV
+local instakill_fovCircle = Instance.new("Frame")
+instakill_fovCircle.Size = UDim2.new(0, instakill_fovSize, 0, instakill_fovSize)
+instakill_fovCircle.Position = UDim2.new(0.5, -instakill_fovSize/2, 0.5, -instakill_fovSize/2)
+instakill_fovCircle.BackgroundColor3 = Color3.new(1, 0, 0)
+instakill_fovCircle.BackgroundTransparency = 0.5
+instakill_fovCircle.BorderSizePixel = 2
+instakill_fovCircle.Visible = false
+instakill_fovCircle.ZIndex = 5
+
+local instakill_uiCorner = Instance.new("UICorner")
+instakill_uiCorner.CornerRadius = UDim.new(0.5, 0)
+instakill_uiCorner.Parent = instakill_fovCircle
+
+instakill_fovCircle.Parent = screenGui
+
+-- Toggle Button (Instakill)
+local instakill_toggleBtn = Instance.new("TextButton")
+instakill_toggleBtn.Size = UDim2.new(0, 120, 0, 40)
+instakill_toggleBtn.Position = UDim2.new(1, -140, 0.4, -20)
+instakill_toggleBtn.Text = "INSTAKILL OFF"
+instakill_toggleBtn.BackgroundColor3 = Color3.new(1, 0, 0)
+instakill_toggleBtn.ZIndex = 10
+instakill_toggleBtn.Parent = screenGui
+
+-- FOV Toggle Button
+local instakill_fovToggleBtn = Instance.new("TextButton")
+instakill_fovToggleBtn.Size = UDim2.new(0, 120, 0, 40)
+instakill_fovToggleBtn.Position = UDim2.new(1, -140, 0.5, -20)
+instakill_fovToggleBtn.Text = "FOV OFF"
+instakill_fovToggleBtn.BackgroundColor3 = Color3.new(0.5, 0, 0)
+instakill_fovToggleBtn.ZIndex = 10
+instakill_fovToggleBtn.Parent = screenGui
+
+-- FOV Size Input (TextBox)
+local instakill_fovSizeInput = Instance.new("TextBox")
+instakill_fovSizeInput.Size = UDim2.new(0, 120, 0, 30)
+instakill_fovSizeInput.Position = UDim2.new(1, -140, 0.6, -20)
+instakill_fovSizeInput.Text = tostring(instakill_fovSize)
+instakill_fovSizeInput.PlaceholderText = "FOV Size (0-100)"
+instakill_fovSizeInput.BackgroundColor3 = Color3.new(0.2, 0.2, 0.2)
+instakill_fovSizeInput.TextColor3 = Color3.new(1, 1, 1)
+instakill_fovSizeInput.ZIndex = 10
+instakill_fovSizeInput.Parent = screenGui
+
+-- ======================================================================
+-- FUNÇÕES COMPARTILHADAS
+-- ======================================================================
+
+-- Função para encontrar RemoteEvent do dano (compartilhada)
 local function getDamageRemote()
     for _, v in next, getnilinstances() do
         if v.Name == "Damage" and v:IsA("RemoteEvent") then
@@ -156,11 +221,15 @@ local function getDamageRemote()
     return nil
 end
 
+-- ======================================================================
+-- KILL NAME - FUNÇÕES ESPECÍFICAS
+-- ======================================================================
+
 -- Função para obter lista de jogadores (para autocomplete)
-local function getPlayerList()
+local function killName_getPlayerList()
     local playerList = {}
     for _, p in pairs(Players:GetPlayers()) do
-        if p ~= player then  -- Excluir a si mesmo
+        if p ~= player then
             table.insert(playerList, p.Name)
         end
     end
@@ -168,13 +237,13 @@ local function getPlayerList()
 end
 
 -- Função de autocomplete
-local function autoComplete(inputText)
+local function killName_autoComplete(inputText)
     if inputText == "" then
-        suggestionsList.Visible = false
+        killName_suggestionsList.Visible = false
         return {}
     end
     
-    local playerList = getPlayerList()
+    local playerList = killName_getPlayerList()
     local matches = {}
     
     inputText = string.lower(inputText)
@@ -189,19 +258,19 @@ local function autoComplete(inputText)
 end
 
 -- Função para atualizar lista de sugestões
-local function updateSuggestions(inputText)
+local function killName_updateSuggestions(inputText)
     -- Limpar sugestões anteriores
-    for _, child in pairs(suggestionsList:GetChildren()) do
+    for _, child in pairs(killName_suggestionsList:GetChildren()) do
         if child:IsA("TextButton") then
             child:Destroy()
         end
     end
     
-    local matches = autoComplete(inputText)
+    local matches = killName_autoComplete(inputText)
     
     if #matches > 0 then
-        suggestionsList.Visible = true
-        suggestionsList.CanvasSize = UDim2.new(0, 0, 0, (#matches * 25) + 10)
+        killName_suggestionsList.Visible = true
+        killName_suggestionsList.CanvasSize = UDim2.new(0, 0, 0, (#matches * 25) + 10)
         
         for i, match in pairs(matches) do
             local suggestionBtn = Instance.new("TextButton")
@@ -221,23 +290,22 @@ local function updateSuggestions(inputText)
             btnCorner.Parent = suggestionBtn
             
             suggestionBtn.MouseButton1Click:Connect(function()
-                playerNameBox.Text = match
-                suggestionsList.Visible = false
+                killName_playerNameBox.Text = match
+                killName_suggestionsList.Visible = false
             end)
             
-            suggestionBtn.Parent = suggestionsList
+            suggestionBtn.Parent = killName_suggestionsList
         end
     else
-        suggestionsList.Visible = false
-        suggestionsList.CanvasSize = UDim2.new(0, 0, 0, 0)
+        killName_suggestionsList.Visible = false
+        killName_suggestionsList.CanvasSize = UDim2.new(0, 0, 0, 0)
     end
 end
 
 -- Função para matar jogador por nome
-local function killPlayerByName(targetName)
+local function killName_killPlayerByName(targetName)
     local targetPlayer = nil
     
-    -- Encontrar jogador pelo nome exato
     for _, p in pairs(Players:GetPlayers()) do
         if string.lower(p.Name) == string.lower(targetName) then
             targetPlayer = p
@@ -272,7 +340,6 @@ local function killPlayerByName(targetName)
         return false
     end
     
-    -- Encontrar RemoteEvent
     local damageRemote = getDamageRemote()
     if not damageRemote then
         local character = player.Character
@@ -289,9 +356,8 @@ local function killPlayerByName(targetName)
         return false
     end
     
-    -- Executar ataques
     local attacksSent = 0
-    for i = 1, 40 do  -- 40 ataques rápidos
+    for i = 1, 40 do
         local success, err = pcall(function()
             damageRemote:FireServer(targetLeftArm)
             attacksSent = attacksSent + 1
@@ -316,188 +382,23 @@ local function killPlayerByName(targetName)
     end
 end
 
--- Eventos da UI
-
--- Abrir/fechar menu principal - SEM ABRIR TECLADO AUTOMÁTICO
-killNameBtn.MouseButton1Click:Connect(function()
-    mainMenu.Visible = not mainMenu.Visible
-    if mainMenu.Visible then
-        -- Restaurar o último nome digitado
-        playerNameBox.Text = lastPlayerName
-        -- NÃO chamar CaptureFocus para evitar abrir o teclado
-        if lastPlayerName ~= "" then
-            updateSuggestions(lastPlayerName)  -- Atualizar sugestões se houver texto
-        else
-            suggestionsList.Visible = false
-        end
-    end
-end)
-
--- Fechar menu E salvar o texto atual
-closeBtn.MouseButton1Click:Connect(function()
-    -- Salvar o texto atual antes de fechar
-    lastPlayerName = playerNameBox.Text
-    mainMenu.Visible = false
-    suggestionsList.Visible = false
-end)
-
--- Autocomplete enquanto digita
-playerNameBox:GetPropertyChangedSignal("Text"):Connect(function()
-    local currentText = playerNameBox.Text
-    -- Atualizar a variável de último nome enquanto digita
-    lastPlayerName = currentText
-    updateSuggestions(currentText)
-end)
-
--- Executar kill
-executeBtn.MouseButton1Click:Connect(function()
-    local targetName = playerNameBox.Text
-    if targetName == "" then
-        print("❌ Digite o nome de um jogador")
-        return
-    end
-    
-    -- Salvar o nome antes de executar
-    lastPlayerName = targetName
-    print("🎯 Tentando matar: " .. targetName)
-    killPlayerByName(targetName)
-end)
-
--- Fechar com ESC e salvar o texto
-UserInputService.InputBegan:Connect(function(input, gameProcessed)
-    if not gameProcessed and input.KeyCode == Enum.KeyCode.Escape and mainMenu.Visible then
-        lastPlayerName = playerNameBox.Text  -- Salvar texto antes de fechar
-        mainMenu.Visible = false
-        playerNameBox.Text = ""
-        suggestionsList.Visible = false
-    end
-end)
-
--- Permitir que o usuário clique no TextBox para abrir o teclado manualmente
-playerNameBox.MouseButton1Click:Connect(function()
-    playerNameBox:CaptureFocus()  -- Apenas quando clica diretamente
-end)
-
--- Inicialização
-print("⚡ KILL NAME MENU CARREGADO")
-print("🎯 Botão localizado no canto direito superior")
-print("🎮 Clique em 'KILL NAME' para abrir o menu")
-print("🔤 Digite nome parcial para autocomplete")
-print("💀 Clique em 'EXECUTAR KILL' para atacar")
-print("💾 Texto é preservado ao fechar e reabrir o menu")
-
--- Atualizar lista de jogadores periodicamente
-spawn(function()
-    while true do
-        task.wait(2)  -- Atualizar a cada 2 segundos
-        if mainMenu.Visible and playerNameBox.Text ~= "" then
-            updateSuggestions(playerNameBox.Text)
-        end
-    end
-end)
-
 -- ======================================================================
--- FIM DA PARTE 1 - KILL NAME
--- COPIE A PARTE 2 ABAIXO DESTA LINHA
+-- INSTAKILL ALL - FUNÇÕES ESPECÍFICAS
 -- ======================================================================
-
--- ⚡ AS-VAL COMPLETO - Parte 2/2 (Instakill All)
--- PARTE 2: INSTAKILL ALL (continuação)
-
-local instakillEnabled = false
-local fovEnabled = false
-local fovSize = 200  -- Tamanho padrão do círculo (0-100 range)
-local maxFOVSize = 500  -- Tamanho máximo do círculo
-
--- Círculo FOV
-local fovCircle = Instance.new("Frame")
-fovCircle.Size = UDim2.new(0, fovSize, 0, fovSize)
-fovCircle.Position = UDim2.new(0.5, -fovSize/2, 0.5, -fovSize/2)
-fovCircle.BackgroundColor3 = Color3.new(1, 0, 0)
-fovCircle.BackgroundTransparency = 0.5
-fovCircle.BorderSizePixel = 2
-fovCircle.Visible = false
-
--- Criar UICorner para fazer o círculo
-local uiCorner2 = Instance.new("UICorner")
-uiCorner2.CornerRadius = UDim.new(0.5, 0)
-uiCorner2.Parent = fovCircle
-
-fovCircle.Parent = screenGui
-
--- Toggle Button
-local toggleBtn = Instance.new("TextButton")
-toggleBtn.Size = UDim2.new(0, 120, 0, 40)
-toggleBtn.Position = UDim2.new(1, -140, 0.4, -20)
-toggleBtn.Text = "INSTAKILL OFF"
-toggleBtn.BackgroundColor3 = Color3.new(1, 0, 0)
-toggleBtn.Parent = screenGui
-
--- FOV Toggle Button
-local fovToggleBtn = Instance.new("TextButton")
-fovToggleBtn.Size = UDim2.new(0, 120, 0, 40)
-fovToggleBtn.Position = UDim2.new(1, -140, 0.5, -20)
-fovToggleBtn.Text = "FOV OFF"
-fovToggleBtn.BackgroundColor3 = Color3.new(0.5, 0, 0)
-fovToggleBtn.Parent = screenGui
-
--- FOV Size Input (TextBox)
-local fovSizeInput = Instance.new("TextBox")
-fovSizeInput.Size = UDim2.new(0, 120, 0, 30)
-fovSizeInput.Position = UDim2.new(1, -140, 0.6, -20)
-fovSizeInput.Text = tostring(fovSize)
-fovSizeInput.PlaceholderText = "FOV Size (0-100)"
-fovSizeInput.BackgroundColor3 = Color3.new(0.2, 0.2, 0.2)
-fovSizeInput.TextColor3 = Color3.new(1, 1, 1)
-fovSizeInput.Parent = screenGui
 
 -- Função para atualizar tamanho do círculo
-local function updateFOVCircle()
-    local actualSize = (fovSize / 100) * maxFOVSize
-    fovCircle.Size = UDim2.new(0, actualSize, 0, actualSize)
-    fovCircle.Position = UDim2.new(0.5, -actualSize/2, 0.5, -actualSize/2)
+local function instakill_updateFOVCircle()
+    local actualSize = (instakill_fovSize / 100) * instakill_maxFOVSize
+    instakill_fovCircle.Size = UDim2.new(0, actualSize, 0, actualSize)
+    instakill_fovCircle.Position = UDim2.new(0.5, -actualSize/2, 0.5, -actualSize/2)
 end
 
--- Toggle principal
-toggleBtn.MouseButton1Click:Connect(function()
-    instakillEnabled = not instakillEnabled
-    toggleBtn.Text = instakillEnabled and "INSTAKILL ON" or "INSTAKILL OFF"
-    toggleBtn.BackgroundColor3 = instakillEnabled and Color3.new(0, 1, 0) or Color3.new(1, 0, 0)
-    print("Instakill:", instakillEnabled and "ATIVADO" or "DESATIVADO")
-end)
-
--- Toggle FOV
-fovToggleBtn.MouseButton1Click:Connect(function()
-    fovEnabled = not fovEnabled
-    fovToggleBtn.Text = fovEnabled and "FOV ON" or "FOV OFF"
-    fovToggleBtn.BackgroundColor3 = fovEnabled and Color3.new(0, 1, 0) or Color3.new(0.5, 0, 0)
-    fovCircle.Visible = fovEnabled
-    print("FOV:", fovEnabled and "ATIVADO" or "DESATIVADO")
-end)
-
--- Input de tamanho FOV
-fovSizeInput.FocusLost:Connect(function(enterPressed)
-    if enterPressed then
-        local value = tonumber(fovSizeInput.Text)
-        if value then
-            fovSize = math.clamp(value, 0, 100)
-            fovSizeInput.Text = tostring(fovSize)
-            updateFOVCircle()
-            print("FOV Size:", fovSize)
-        else
-            fovSizeInput.Text = tostring(fovSize)
-        end
-    end
-end)
-
 -- Função CORRIGIDA para verificar se jogador deve ser atacado
-local function shouldAttackPlayer(targetPlayer)
-    -- Se FOV está desativado, atacar todos
-    if not fovEnabled then
+local function instakill_shouldAttackPlayer(targetPlayer)
+    if not instakill_fovEnabled then
         return true
     end
     
-    -- Se FOV está ativado, verificar se está dentro do círculo
     if not targetPlayer.Character then 
         return false
     end
@@ -521,30 +422,16 @@ local function shouldAttackPlayer(targetPlayer)
     local targetPosition = Vector2.new(screenPoint.X, screenPoint.Y)
     local distance = (targetPosition - circleCenter).magnitude
     
-    local actualFOVSize = (fovSize / 100) * maxFOVSize / 2
+    local actualFOVSize = (instakill_fovSize / 100) * instakill_maxFOVSize / 2
     local isInFOV = distance <= actualFOVSize
     
     return isInFOV
 end
 
--- TÉCNICA PROFSSIONAL: Usar getnilinstances como no seu exemplo
-local function getNilDamageRemote()
-    for _, v in next, getnilinstances() do
-        if v.Name == "Damage" and v:IsA("RemoteEvent") then
-            local parent = v.Parent
-            if parent and parent.Name == "Gun_Local" then
-                return v
-            end
-        end
-    end
-    return nil
-end
-
--- INSTAKILL OTIMIZADO - Com verificação corrigida
-local function asvalInstakillOptimized()
-    local damageRemote = getNilDamageRemote()
+-- INSTAKILL OTIMIZADO
+local function instakill_asvalInstakillOptimized()
+    local damageRemote = getDamageRemote()
     
-    -- Fallback para método original se getnilinstances falhar
     if not damageRemote then
         local character = player.Character
         if character then
@@ -564,20 +451,18 @@ local function asvalInstakillOptimized()
     local playersChecked = 0
     
     for _, targetPlayer in pairs(Players:GetPlayers()) do
-        if not instakillEnabled then break end
+        if not instakill_enabled then break end
         
         playersChecked = playersChecked + 1
         
         if targetPlayer ~= player and targetPlayer.Character then
-            -- VERIFICAÇÃO CORRIGIDA: Usar função clara de decisão
-            if shouldAttackPlayer(targetPlayer) then
+            if instakill_shouldAttackPlayer(targetPlayer) then
                 local targetLeftArm = targetPlayer.Character:FindFirstChild("Left Arm")
                 local targetHumanoid = targetPlayer.Character:FindFirstChildOfClass("Humanoid")
                 
                 if targetLeftArm and targetHumanoid and targetHumanoid.Health > 0 then
-                    -- 30 ATAQUES RÁPIDOS (reduzido para estabilidade)
                     for i = 1, 30 do
-                        if not instakillEnabled then break end
+                        if not instakill_enabled then break end
                         
                         local success, err = pcall(function()
                             damageRemote:FireServer(targetLeftArm)
@@ -588,7 +473,6 @@ local function asvalInstakillOptimized()
                             print("❌ Erro no ataque:", err)
                         end
                         
-                        -- Pequeno delay a cada 10 ataques para estabilidade
                         if i % 10 == 0 then
                             task.wait(0.001)
                         end
@@ -604,11 +488,10 @@ local function asvalInstakillOptimized()
                 end
             else
                 -- FOV ativado e jogador fora do círculo
-                -- print("ℹ️  Jogador fora do FOV:", targetPlayer.Name) -- Comentado para menos spam
             end
         else
             if targetPlayer == player then
-                -- print("ℹ️  Ignorando self") -- Comentado para menos spam
+                -- Ignorando self
             else
                 print("⚠️  Target sem Character:", targetPlayer.Name)
             end
@@ -622,47 +505,44 @@ local function asvalInstakillOptimized()
     return totalAttacks > 0
 end
 
--- Loop principal otimizado COM TRATAMENTO DE ERROS
-local function instakillLoop()
-    if not instakillEnabled then return end
+-- Loop principal otimizado
+local function instakill_instakillLoop()
+    if not instakill_enabled then return end
     
     local success, err = pcall(function()
-        asvalInstakillOptimized()
+        instakill_asvalInstakillOptimized()
     end)
     
     if not success then
         print("❌ Erro no loop principal:", err)
     end
     
-    task.wait(0.05)  -- Aumentado para estabilidade
+    task.wait(0.05)
 end
 
-spawn(function()
-    while true do
-        if instakillEnabled then
-            instakillLoop()
+-- ======================================================================
+-- EVENTOS DA INTERFACE - KILL NAME
+-- ======================================================================
+
+-- Abrir/fechar menu principal - SEM ABRIR TECLADO AUTOMÁTICO
+killNameBtn.MouseButton1Click:Connect(function()
+    killName_mainMenu.Visible = not killName_mainMenu.Visible
+    if killName_mainMenu.Visible then
+        killName_playerNameBox.Text = killName_lastPlayerName
+        if killName_lastPlayerName ~= "" then
+            killName_updateSuggestions(killName_lastPlayerName)
+        else
+            killName_suggestionsList.Visible = false
         end
-        task.wait(0.01)
     end
 end)
 
--- Atualizar posição do círculo continuamente
-spawn(function()
-    while true do
-        if fovEnabled then
-            updateFOVCircle()
-        end
-        task.wait(0.05)  -- Aumentado para menos processamento
-    end
+-- Fechar menu E salvar o texto atual
+killName_closeBtn.MouseButton1Click:Connect(function()
+    killName_lastPlayerName = killName_playerNameBox.Text
+    killName_mainMenu.Visible = false
+    killName_suggestionsList.Visible = false
 end)
 
-print("⚡ AS-VAL INSTAKILL OTIMIZADO - BUG CORRIGIDO")
-print("🔧 Problemas identificados e resolvidos:")
-print("   - Verificação clara de quando atacar")
-print("   - Mensagens de debug para identificar problemas")
-print("   - Tratamento de erros robusto")
-print("   - Loop mais estável")
-
-print("⚡ AS-VAL COMPLETO CARREGADO COM SUCESSO!")
-print("✅ Kill Name e Instakill funcionando independentemente")
-print("🎮 Sem interferência entre os scripts")
+-- Autocomplete enquanto digita
+kil
